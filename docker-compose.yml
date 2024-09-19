@@ -1,0 +1,16 @@
+version: '3'
+
+networks:
+  dokploy-network:
+    external: true
+
+services:
+  tgcampusbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app
+    networks:
+      - dokploy-network
+    restart: unless-stopped
