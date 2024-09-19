@@ -6,11 +6,11 @@ networks:
 
 services:
   tgcampusbot:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: node:20
     volumes:
       - .:/usr/src/app
     networks:
       - dokploy-network
+    working_dir: /usr/src/app
+    command: ["npm", "start"] # Comando que você quer executar ao iniciar o container
     restart: unless-stopped
