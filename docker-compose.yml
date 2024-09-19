@@ -12,5 +12,5 @@ services:
     networks:
       - dokploy-network
     working_dir: /usr/src/app
-    command: ["npm", "start"] # Comando que você quer executar ao iniciar o container
+    command: ["sh", "-c", "npm install && npm start"] # Instala as dependências e inicia o aplicativo
     restart: unless-stopped
