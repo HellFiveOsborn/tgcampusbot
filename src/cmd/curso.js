@@ -7,8 +7,7 @@ require('dotenv').config();
  * @returns {Promise<void>}
  */
 const cursoInfo = async (ctx, helper) => {
-    ctx.answerCbQuery('⌛️ Carregando curso...');
-
+    ctx.update?.callback_query && ctx?.answerCbQuery('⌛️ Carregando curso...');
     const courseId = ctx.match[1];
     const page = ctx.match[2] ? parseInt(ctx.match[2]) : 1;
     const itemsPerPage = 10;
@@ -26,6 +25,8 @@ const cursoInfo = async (ctx, helper) => {
         });
 
         let curso = cursos[0];
+
+        if (!curso) throw new Error('Curso não encontrado!');
 
         const aulas = await new Promise((resolve, reject) => {
             helper.consultar('aulas', [`id_curso = ${courseId}`], (err, aulas) => {
@@ -91,15 +92,17 @@ const cursoInfo = async (ctx, helper) => {
             buttons.push([{ text: `❌ Não há aulas!`, callback_data: `/cursos` }]);
         }
 
-        const msg = `*Título:* _${curso.titulo}_
-*Autor:* _${curso.autor}_
+        const msg = `*Título:* _${curso?.titulo}_
+*Autor:* _${curso?.autor}_
 
 *Sobre:*
-${curso.sobre_curso}
+${curso?.sobre_curso}
 ${totalAssistido == totalAulas ? '\nㅤㅤ*✅ Você completou todas as aulas!*\n' : '\r'}
-${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}`;
+${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}
 
-        if (ctx.update.callback_query.message.video) {
+🔗 \`t.me/${ctx.botInfo?.username}?start=${curso.id}\``;
+
+        if (ctx.update?.callback_query?.message?.video) {
             ctx.deleteMessage();
             ctx.reply(msg, {
                 parse_mode: 'Markdown',
@@ -111,7 +114,7 @@ ${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}`;
                 }
             })
         } else {
-            ctx.editMessageText(msg, {
+            const payload = {
                 parse_mode: 'Markdown',
                 reply_markup: {
                     inline_keyboard: buttons
@@ -119,7 +122,9 @@ ${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}`;
                 link_preview_options: {
                     show_above_text: true
                 }
-            });
+            };
+            ctx.editMessageText(msg, payload)
+                .catch(() => ctx.reply(msg, payload)); 
         }
     } catch (err) {
         console.error(err);

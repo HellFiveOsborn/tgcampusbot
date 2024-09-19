@@ -15,11 +15,11 @@ const listarCursos = async (ctx, helper) => {
     ['status == 1'],
     async (err, cursos) => {
       if (err) {
-        ctx.answerCbQuery('❌ Ocorreu um erro ao obter a lista de cursos, tente novamente!', {
+        ctx.update?.callback_query && ctx.answerCbQuery('❌ Ocorreu um erro ao obter a lista de cursos, tente novamente!', {
           show_alert: true,
         });
       } else {
-        ctx.answerCbQuery('⌛️ Carregando cursos...');
+        ctx.update?.callback_query && ctx.answerCbQuery('⌛️ Carregando cursos...');
 
         const buttons = [];
 
@@ -66,14 +66,16 @@ const listarCursos = async (ctx, helper) => {
           }
 
           // Botão de retroceder
-          buttons.push([{ text: `🔙 Voltar`, callback_data: `/voltar` }]);
-
-          ctx.editMessageText('*📚 Lista de Cursos 🎓*\n\nEscolha abaixo o curso que deseja explorar e aprimorar seus conhecimentos! 👇', {
+          ctx.update?.callback_query && buttons.push([{ text: `🔙 Voltar`, callback_data: `/voltar` }]);
+          const msg = '*📚 Lista de Cursos 🎓*\n\nEscolha abaixo o curso que deseja explorar e aprimorar seus conhecimentos! 👇';
+          const payload = {
             parse_mode: 'Markdown',
             reply_markup: {
                 inline_keyboard: buttons
             }
-          });
+          };
+          ctx.editMessageText(msg, payload)
+            .catch(() => ctx.reply(msg, payload));
         } else {
           ctx.reply('*😕 Não há cursos disponíveis!*', {
             parse_mode: 'Markdown'

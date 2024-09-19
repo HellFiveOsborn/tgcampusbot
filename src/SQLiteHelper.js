@@ -152,7 +152,7 @@ class SQLiteHelper {
           const novoUsuario = {
             chat_id: chatID,
             ultm_msg: 0,
-            status: 1 // usuário ativo
+            status: 0 // usuário inativo
           };
           
           try {
@@ -193,10 +193,14 @@ class SQLiteHelper {
           return;
         }
     
-        const { ultm_msg } = usuario;
+        const { ultm_msg, status } = usuario;
         const novosDados = { ultm_msg: timestampAtual };
-  
 
+        if (!status) {
+          ctx.reply('Você não possui acesso!');
+          return;
+        }
+  
         if (ultm_msg && (ultm_msg + COOLDOWN_TEMPO) > timestampAtual) {
           if (ctx.update.callback_query) {
             ctx.answerCbQuery(`Você está enviando muitas mensagens rapidamente. Espere ${COOLDOWN_TEMPO / 1000}s antes de enviar novamente.`, {

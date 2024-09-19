@@ -52,8 +52,8 @@ const uploadMultiVideoAulas = async (ctx, sessionCache, curso_id) => {
         const matchTitulo = caption.match(/^(?:#F\d+ )?(?<titulo>.+)/);
         const matchDescricao = caption.match(/(?<=\n\n)(?<descricao>.*)/sm);
 
-        const titulo_aula = matchTitulo?.groups?.titulo?.trim() || '';
-        const descricao = matchDescricao?.groups?.descricao?.trim() || '';
+        const titulo_aula = matchTitulo?.groups?.titulo?.trim() || ((videoQueue.videos.length + 1) + '. Episodio');
+        const descricao = matchDescricao?.groups?.descricao?.trim() || 'N/A';
 
         // Adicionar o vídeo à fila de vídeos
         videoQueue.videos.push({
@@ -66,28 +66,25 @@ const uploadMultiVideoAulas = async (ctx, sessionCache, curso_id) => {
         sessionCache.set(`video_queue_${ctx.from.id}`, videoQueue);
 
         const queueLength = videoQueue.videos.length;
+        const payload = {
+            parse_mode: 'Markdown',
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: 'Sim', callback_data: '/confirmar_envio' },
+                        { text: 'Cancelar', callback_data: '/cancelar_envio' },
+                    ],
+                ],
+            },
+        };
 
         if (queueLength < 10) {
             // Ainda há espaço na fila de vídeos, aguardar mais envios
-            const { message_id } = await ctx.reply(`*Vídeo adicionado à fila! Total de vídeos na fila:* ${queueLength}`, {
-                parse_mode: 'Markdown'
-            });
-
+            const { message_id } = await ctx.reply(`*Vídeo adicionado à fila! Total de vídeos na fila:* ${queueLength}`, payload);
             sessionCache.set(`video_queue_msg_id_${ctx.from.id}`, message_id);
         } else {
             // A fila de vídeos atingiu o limite de 10 vídeos, solicitar confirmação para envio
-            const { message_id } = await ctx.reply('*A fila de vídeos atingiu o limite de 10 vídeos. Deseja enviar os vídeos para o grupo de backup?*', {
-                parse_mode: 'Markdown',
-                reply_markup: {
-                    inline_keyboard: [
-                        [
-                            { text: 'Sim', callback_data: '/confirmar_envio' },
-                            { text: 'Cancelar', callback_data: '/cancelar_envio' },
-                        ],
-                    ],
-                },
-            });
-
+            const { message_id } = await ctx.reply('*A fila de vídeos atingiu o limite de 10 vídeos. Deseja enviar os vídeos para o grupo de backup?*', payload);
             sessionCache.set(`video_queue_msg_id_${ctx.from.id}`, message_id);
         }
     } catch (error) {

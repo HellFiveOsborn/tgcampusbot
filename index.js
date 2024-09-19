@@ -30,12 +30,20 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // Middleware's
 bot.use(helper.ControlaFloodMiddleware.bind(helper));
 
-bot.start((ctx) => startTemplate(ctx)); // Apresentação do bot
-bot.command('/cursos', async (ctx) => await listarCursos(ctx, helper)); // Listar cursos disponíveis
+bot.start((ctx) => startTemplate(ctx, helper)); // Apresentação do bot
+bot.command('cursos', async (ctx) => await listarCursos(ctx, helper)); // Listar cursos disponíveis
 bot.action(/\/cursos(\s\d+)?/, async (ctx) => await listarCursos(ctx, helper)); // Listar cursos disponíveis
 bot.action(/\/curso (\d+)(?:\s(\d+))?/, async (ctx) => await cursoInfo(ctx, helper)); // Informações curso
 bot.action(/\/watch (\d+) (\d+)(\s\d+)?/, async (ctx) => await assistirCurso(ctx, helper)); // Assistir aula
 bot.action(/\/setstatus (\d+) (\d+)/, async (ctx) => await setStatusAula(ctx, helper)); // Define status da aula Visto/Não Visto
+bot.hears(/\/acesso (?<chatId>\d+)/, (ctx) => {
+    if (ctx.chat.id == adminChatId) {
+        helper.consultar('usuarios', [`chat_id = ${ctx.match?.groups?.chatId}`], (erro, usuario) => {
+            helper.update('usuarios', { status: (Boolean(usuario[0]?.status) ? 0 : 1) }, { chat_id: ctx.match?.groups?.chatId });
+            ctx.reply(`Acesso para ${ctx.match?.groups?.chatId} alterado para ${Boolean(usuario[0]?.status) ? 'OFF' : 'ON'}`);
+        });
+    }
+});
 
 /**
  *  A D M I N
@@ -166,7 +174,7 @@ bot.action('/confirmar_envio', async (ctx) => {
                     sessionCache.set(`video_queue_msg_id_${ctx.from.id}`, message_id);
 
                     const result = await ctx.telegram.sendVideo(backupChatId, video.file_id, {
-                        caption: `#${curso.titulo} - ${curso.autor}\n\n${titulo_aula}`,
+                        caption: `#${curso?.titulo} - ${curso?.autor}\n\n${titulo_aula}`,
                         parse_mode: 'Markdown',
                     });
 

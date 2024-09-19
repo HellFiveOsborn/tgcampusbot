@@ -1,12 +1,22 @@
+const { cursoInfo } = require('./curso');
+
 require('dotenv').config();
 
 /**
  * Função start
  * @param {import('telegraf').Context} ctx - O objeto de contexto do Telegraf.
+ * @param {import('../@types/sqlite-helper')} helper - O objeto helper.
  * @returns {Promise<void>}
  */
-const startTemplate = (ctx) => {
+const startTemplate = (ctx, helper) => {
     const adminChatId = process.env.ADMIN_CHAT_ID; // Chat_ID do administrador
+    const [command, ...args] = ctx.message.text.split(' ');
+
+    if (args.length > 0) {
+        ctx.match = [...ctx.match, ...args];
+        (async () => await cursoInfo(ctx, helper))();
+        return;
+    }
 
     const buttons = [
         [{ text: '📚 Cursos', callback_data: '/cursos' }]
