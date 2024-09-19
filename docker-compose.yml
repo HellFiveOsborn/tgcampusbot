@@ -7,8 +7,6 @@ networks:
 services:
   tgcampusbot:
     image: node:20
-    volumes:
-      - .:/usr/src/app
     networks:
       - dokploy-network
     working_dir: /usr/src/app
@@ -20,5 +18,6 @@ services:
     # Crontab para executar o backup todos os dias às 02:00 no horário de São Paulo (BRT)
     # 0 2 * * * root /usr/local/bin/node /usr/src/app/backup.js > /dev/null 2>&1
     volumes:
+      - .:/usr/src/app
       - ./crontab:/etc/cron.d/tgcampusbot-cron
       - /etc/localtime:/etc/localtime:ro # Sincroniza o timezone com o host
