@@ -6,11 +6,20 @@ class SessionCache {
         this.timeouts = {};
         this.cacheFilePath = 'cache.json';
 
-        // Carregar o cache do arquivo, se existir
-        if (fs.existsSync(this.cacheFilePath)) {
-            const cacheData = fs.readFileSync(this.cacheFilePath, 'utf8');
-            if (cacheData) {
+        // Verificar se o arquivo cache.json existe, se não, criar um arquivo vazio
+        if (!fs.existsSync(this.cacheFilePath)) {
+            // Criar o arquivo cache.json vazio
+            fs.writeFileSync(this.cacheFilePath, JSON.stringify({}), 'utf8');
+        }
+
+        // Carregar o cache do arquivo, se existir e for válido
+        const cacheData = fs.readFileSync(this.cacheFilePath, 'utf8');
+        if (cacheData) {
+            try {
                 this.cache = JSON.parse(cacheData);
+            } catch (error) {
+                console.error('Erro ao parsear o cache.json, usando cache vazio.', error);
+                this.cache = {}; // Se houver erro, usar cache vazio
             }
         }
     }

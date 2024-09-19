@@ -23,7 +23,7 @@ const backupChatId = process.env.BACKUP_CHAT_ID; // backup das aulas
 const helper = new SQLiteHelper('database.db');
 const sessionCache = new SessionCache(); // Criação da instância da classe SessionCache
 
-// helper.setup();
+helper.setup();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -31,6 +31,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.use(helper.ControlaFloodMiddleware.bind(helper));
 
 bot.start((ctx) => startTemplate(ctx)); // Apresentação do bot
+bot.command('/cursos', async (ctx) => await listarCursos(ctx, helper)); // Listar cursos disponíveis
 bot.action(/\/cursos(\s\d+)?/, async (ctx) => await listarCursos(ctx, helper)); // Listar cursos disponíveis
 bot.action(/\/curso (\d+)(?:\s(\d+))?/, async (ctx) => await cursoInfo(ctx, helper)); // Informações curso
 bot.action(/\/watch (\d+) (\d+)(\s\d+)?/, async (ctx) => await assistirCurso(ctx, helper)); // Assistir aula
@@ -225,7 +226,9 @@ bot.action('/cancelar_envio', async (ctx) => {
     }
 });
 
-bot.launch();
+bot.launch(() => {
+    console.log('Bot is running!')
+});
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));

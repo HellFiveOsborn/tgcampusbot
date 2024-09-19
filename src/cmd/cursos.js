@@ -7,7 +7,7 @@ require('dotenv').config();
  * @returns {Promise<void>}
  */
 const listarCursos = async (ctx, helper) => {
-  const page = ctx.match[1] ? parseInt(ctx.match[1]) : 1; // Página atual
+  const page = ctx?.match[1] ? parseInt(ctx?.match[1]) : 1; // Página atual
   const limit = 10; // Limite de itens por página
 
   helper.consultar(
@@ -86,5 +86,5 @@ const listarCursos = async (ctx, helper) => {
 };
 
 module.exports = {
-    listarCursos,
+  listarCursos,
 }
