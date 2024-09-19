@@ -71,9 +71,9 @@ const cursoInfo = async (ctx, helper) => {
         
             // Adicionar botão de continuar para a última aula assistida
             if (aulasAssistidas.length > 0) {
-                const ep = (index + 1) + '. Episodio';
                 const ultimaAulaAssistida = aulasAssistidas[aulasAssistidas.length - 1];
                 const ultimaAula = aulas.find(aula => aula.id == ultimaAulaAssistida.id_aula);
+                const ep = ultimaAulaAssistida?.id_aula + '. Episodio';
                 buttons.push([{ text: `✍️ Continuar (${ultimaAula?.titulo_aula || ep})`, callback_data: `/watch ${courseId} ${ultimaAulaAssistida.id_aula} ${page}` }]);
             }
         
