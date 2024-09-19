@@ -12,5 +12,5 @@ services:
     networks:
       - dokploy-network
     working_dir: /usr/src/app
-    command: ["sh", "-c", "npm install && npm start"] # Instala as dependências e inicia o aplicativo
+    command: ["sh", "-c", "npm install --force && npm start"] # Instala as dependências e inicia o aplicativo
     restart: unless-stopped
