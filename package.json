@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "loop": "nodemon --quiet index.js -i cache.json"
+    "loop": "npx nodemon --quiet index.js -i cache.json"
   },
   "name": "ProjetoCampusBot",
   "version": "1.0.0",

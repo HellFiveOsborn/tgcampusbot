@@ -3,3 +3,6 @@ node_modules/*
 yarn.lock
 cache.json
 database.db
+.idx/*
+package-lock.json
+.vscode/*

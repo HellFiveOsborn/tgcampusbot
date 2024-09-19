@@ -11,9 +11,9 @@ const { cursoInfo } = require('./src/cmd/curso');
 const { assistirCurso } = require('./src/cmd/assistir');
 const { setStatusAula } = require('./src/cmd/setstatus');
 // @=============================================ADMIN=================================================
-const { InputAddCurso, setStatusCurso } = require('./src/cmd/admin/addcurso');
+const { InputAddCurso, setStatusCurso, InputEditCurso } = require('./src/cmd/admin/addcurso');
 const { uploadVideoAula, InputAddAula } = require('./src/cmd/admin/addaula');
-const { editarCurso } = require('./src/cmd/admin/editcurso');
+const { editarCurso, editarCursoData } = require('./src/cmd/admin/editcurso');
 const { listarCursosAdmin } = require('./src/cmd/admin/cursos');
 const { InputMultiAula, uploadMultiVideoAulas } = require('./src/cmd/admin/addmultiaula');
 
@@ -26,7 +26,7 @@ const sessionCache = new SessionCache(); // Criação da instância da classe Se
 // helper.setup();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-    
+
 // Middleware's
 bot.use(helper.ControlaFloodMiddleware.bind(helper));
 
@@ -95,6 +95,7 @@ bot.action(/\/multienvio (\d+)/, async (ctx) => {
 
 bot.action(/\/listacursos(\s\d+)?/, async (ctx) => await listarCursosAdmin(ctx, helper)); // Listar cursos
 bot.action(/\/editarcurso (\d+)(?:\s(\d+))?/, async (ctx) => await editarCurso(ctx, helper, sessionCache)); // Editar curso
+bot.action(/\/editarcursodata (?<cursoId>\d+)(\s(?<action>\w+))?/, async (ctx) => await editarCursoData(ctx, helper, sessionCache)); // Editar dados do curso
 bot.action(['status_ativo', 'status_inativo'], async (ctx) => await setStatusCurso(ctx, sessionCache, helper)); // Ação para capturar a escolha do status
 bot.action('/voltar', async (ctx) => {
     ctx.answerCbQuery('⌛️ Voltando para o início...');
@@ -122,6 +123,7 @@ bot.on('video', async (ctx) => {
 bot.on('message', async (ctx) => {
     await InputAddCurso(ctx, sessionCache); // Processo de cadastrar curso.
     await InputAddAula(ctx, sessionCache); // Processo de cadastrar aula.
+    await InputEditCurso(ctx, sessionCache, helper); // Processo de editar curso.
 });
 
 // Tratar as ações dos botões de confirmação e cancelamento

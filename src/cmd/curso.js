@@ -63,16 +63,18 @@ const cursoInfo = async (ctx, helper) => {
         
             // Exibir as demais aulas
             aulasPagina.forEach((value, index) => {
+                const ep = (index + 1) + '. Episodio';
                 const assistida = aulasAssistidas.find(aula => aula.id_aula === value.id);
                 const emoji = assistida ? '✅ ' : '';
-                buttons.push([{ text: `${emoji}${value.titulo_aula}`, callback_data: `/watch ${courseId} ${value.id} ${page}` }]);
+                buttons.push([{ text: `${emoji}${value?.titulo_aula || ep }`, callback_data: `/watch ${courseId} ${value.id} ${page}` }]);
             });
         
             // Adicionar botão de continuar para a última aula assistida
             if (aulasAssistidas.length > 0) {
+                const ep = (index + 1) + '. Episodio';
                 const ultimaAulaAssistida = aulasAssistidas[aulasAssistidas.length - 1];
                 const ultimaAula = aulas.find(aula => aula.id == ultimaAulaAssistida.id_aula);
-                buttons.push([{ text: `✍️ Continuar (${ultimaAula.titulo_aula})`, callback_data: `/watch ${courseId} ${ultimaAulaAssistida.id_aula} ${page}` }]);
+                buttons.push([{ text: `✍️ Continuar (${ultimaAula?.titulo_aula || ep})`, callback_data: `/watch ${courseId} ${ultimaAulaAssistida.id_aula} ${page}` }]);
             }
         
             // Verificar se há mais páginas para exibir o botão de continuar
@@ -103,6 +105,9 @@ ${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}`;
                 parse_mode: 'Markdown',
                 reply_markup: {
                     inline_keyboard: buttons
+                },
+                link_preview_options: {
+                    show_above_text: true
                 }
             })
         } else {
@@ -110,6 +115,9 @@ ${totalAulas > 0 ? `🖥 Há *${totalAulas}* Aulas, bons estudos.` : '\r'}`;
                 parse_mode: 'Markdown',
                 reply_markup: {
                     inline_keyboard: buttons
+                },
+                link_preview_options: {
+                    show_above_text: true
                 }
             });
         }

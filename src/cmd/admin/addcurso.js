@@ -110,6 +110,87 @@ const InputAddCurso = async (ctx, sessionCache) => {
 }
 
 /**
+ * Recolher dados como titulo, descrição do curso e salvar.
+ * @param {import('telegraf').Context} ctx - O objeto de contexto do Telegraf.
+ * @param {object} sessionCache - O objeto sessionCache
+ * @param {import('./../../@types/sqlite-helper')} helper - O objeto do SQLiteHelper
+ * @returns {Promise<void>}
+ */
+const InputEditCurso = async (ctx, sessionCache, helper) => {
+    const currentStep = sessionCache.get(`etapa_editcurso_${ctx.from.id}`); // Verifica a etapa atual
+    if ( !currentStep ) return;
+
+    if (ctx.chat.id == adminChatId) {
+        if ( ctx.updateType == 'message' ) {
+            if (ctx.message.text && ctx.message.text.toLowerCase() == 'cancelar') {
+                await ctx.reply('*🤔 Deseja cancelar o processo? Digite:* _SIM_', { 
+                    parse_mode: 'Markdown' 
+                });
+
+                sessionCache.setEx(`cancelar_${ctx.from.id}`, 'curso', 30); // Expira em 30 segundos
+                return;
+            } else if ( sessionCache.get(`cancelar_${ctx.from.id}`) == 'curso' && ctx.message.text.toLowerCase() == 'sim' ) {
+                sessionCache.delete(`etapa_editcurso_${ctx.from.id}`);
+                sessionCache.delete(`cancelar_${ctx.from.id}`);
+    
+                await ctx.reply('_❌ Processo Cancelado!_', { parse_mode: 'Markdown' });
+                return;
+            }
+
+            const { step, course_id } = currentStep;
+
+            switch (step) {
+                case 'titulo':
+                        await new Promise((resolve, reject) => {
+                            helper.update('cursos', { titulo: ctx.message.text }, { id: course_id }, (err) => {
+                                if (!err) {
+                                    return reject(err);
+                                } 
+                                sessionCache.delete(`etapa_editcurso_${ctx.from.id}`);
+
+                                ctx.reply('*✅ O curso foi editado com sucesso!*', {
+                                    parse_mode: 'Markdown'
+                                });
+                                return resolve(true);
+                            });
+                        });
+                    break;
+                case 'desc':
+                    await new Promise((resolve, reject) => {
+                        helper.update('cursos', { sobre_curso: ctx.message.text }, { id: course_id }, (err) => {
+                            if (!err) {
+                                return reject(err);
+                            } 
+                            sessionCache.delete(`etapa_editcurso_${ctx.from.id}`);
+
+                            ctx.reply('*✅ O curso foi editado com sucesso!*', {
+                                parse_mode: 'Markdown'
+                            });
+                            return resolve(true);
+                        });
+                    });
+                    break;
+                case 'author':
+                    await new Promise((resolve, reject) => {
+                        helper.update('author', { author: ctx.message.text }, { id: course_id }, (err) => {
+                            if (!err) {
+                                return reject(err);
+                            } 
+                            sessionCache.delete(`etapa_editcurso_${ctx.from.id}`);
+
+                            ctx.reply('*✅ O curso foi editado com sucesso!*', {
+                                parse_mode: 'Markdown'
+                            });
+                            return resolve(true);
+                        });
+                    });
+                    break;
+            }
+        }
+    }
+}
+
+/**
  * Finalizar adição do curso e salvar.
  * @param {import('telegraf').Context} ctx - O objeto de contexto do Telegraf.
  * @param {object} sessionCache - O objeto sessionCache
@@ -149,5 +230,6 @@ const setStatusCurso = async (ctx, sessionCache, helper) => {
 
 module.exports = {
     setStatusCurso,
-    InputAddCurso
+    InputAddCurso,
+    InputEditCurso
 }
